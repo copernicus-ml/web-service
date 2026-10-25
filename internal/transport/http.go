@@ -7,7 +7,7 @@ import (
 )
 
 func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
-	storeGroup := router.Group("/data")
+	storeGroup := router.Group("/data", SessionClaimMiddleware())
 
 	// get stock list
 	storeGroup.GET("/stock/list", func(c *gin.Context) {
@@ -24,7 +24,6 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 			return
 		}
 		OK(c, stockInfo)
-
 	})
 
 	// get stock prices data

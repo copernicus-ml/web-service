@@ -7,18 +7,23 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
+	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
 	"github.com/copernicus-ml/web-service/internal/repositories"
 	"github.com/copernicus-ml/web-service/internal/transport"
 )
 
 const (
-	portNumber = 8800
-	goEnv      = "GO_ENV"
+	portNumber        = 8800
+	goEnv             = "GO_ENV"
+	clerkKeyEnv       = "CLERK_SECRET_KEY"
+	allowedOriginsEnv = "ALLOWED_ORIGINS"
 )
 
 const (
@@ -37,6 +42,33 @@ func main() {
 		runtimeEnv = runtimeDev
 	}
 
+	// init clerk auth client
+	clerkSecretKey := os.Getenv(clerkKeyEnv)
+	if len(clerkSecretKey) == 0 {
+		logger.Error("clerk secret key should not be empty")
+		os.Exit(1)
+	}
+	clerk.SetKey(clerkSecretKey)
+
+	// get allowed orgins
+	allowedOrigins := os.Getenv(allowedOriginsEnv)
+	if len(allowedOrigins) == 0 {
+		logger.Error("allowed origins should not be empty")
+		os.Exit(1)
+	}
+	origins := strings.Split(strings.TrimSpace(allowedOrigins), ";")
+
+	// create a Gin router
+	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     origins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// init repositories
 	stockStore, err := repositories.NewStockStore(ctx, runtimeEnv, logger)
 	if err != nil {
@@ -46,29 +78,17 @@ func main() {
 
 	// init handlers
 	stockHandler := transport.NewStockStoreHandler(stockStore, logger)
-
-	// create a Gin router
-	router := gin.Default()
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:4173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
-
-	// define routers
-	if runtimeEnv == runtimeDev {
-		router.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"message": "pong"})
-		})
-	}
 	transport.SetupStoreRoutes(router, stockHandler)
 
+	protectedRouter := clerkhttp.WithHeaderAuthorization(
+		clerkhttp.AuthorizedPartyMatches(origins...),
+		clerkhttp.CustomClaimsConstructor(func(context.Context) any {
+			return &transport.SessionCustomClaims{}
+		}),
+	)(router)
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", portNumber),
-		Handler:      router,
+		Handler:      protectedRouter,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 	}
