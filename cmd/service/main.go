@@ -80,9 +80,14 @@ func main() {
 	stockHandler := transport.NewStockStoreHandler(stockStore, logger)
 	transport.SetupStoreRoutes(router, stockHandler)
 
-	protectedRouter := clerkhttp.WithHeaderAuthorization(clerkhttp.AuthorizedPartyMatches(origins...))(router)
+	protectedRouter := clerkhttp.WithHeaderAuthorization(
+		clerkhttp.AuthorizedPartyMatches(origins...),
+		clerkhttp.CustomClaimsConstructor(func(context.Context) any {
+			return &transport.SessionCustomClaims{}
+		}),
+	)(router)
 	server := &http.Server{
-		Addr:         fmt.Sprintf("0.0.0.0:%d", portNumber),
+		Addr:         fmt.Sprintf(":%d", portNumber),
 		Handler:      protectedRouter,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
