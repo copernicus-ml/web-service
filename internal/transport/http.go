@@ -24,7 +24,6 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 			return
 		}
 		OK(c, stockInfo)
-
 	})
 
 	// get stock prices data
