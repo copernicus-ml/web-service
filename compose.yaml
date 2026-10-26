@@ -1,0 +1,6 @@
+services:
+  gcp-deployment:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/copernicus/prod:${IMAGE_TAG:-latest}

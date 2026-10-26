@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	portNumber        = 8800
+	portNumber        = 8080
 	goEnv             = "GO_ENV"
 	clerkKeyEnv       = "CLERK_SECRET_KEY"
 	allowedOriginsEnv = "ALLOWED_ORIGINS"
