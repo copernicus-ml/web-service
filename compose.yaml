@@ -1,6 +1,14 @@
+x-build-common: &build-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+
 services:
-  gcp-deployment:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/copernicus/prod:${IMAGE_TAG:-latest}
+  build-amd:
+    <<: *build-common
+    platform: linux/amd64
+    image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/copernicus/web-service:${IMAGE_TAG:-latest}
+  build-arm:
+    <<: *build-common
+    platform: linux/arm64
+    image: copernicus:arm64
