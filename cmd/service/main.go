@@ -17,6 +17,7 @@ import (
 	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
 	"github.com/copernicus-ml/web-service/internal/repositories"
 	"github.com/copernicus-ml/web-service/internal/transport"
+	"github.com/copernicus-ml/web-service/internal/utils"
 )
 
 const (
@@ -33,7 +34,9 @@ const (
 
 func main() {
 	// init logger and context
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		ReplaceAttr: utils.LoggerGoogleFormate,
+	}))
 	ctx := context.Background()
 	// get runtime env
 	runtimeEnv := os.Getenv(goEnv)
