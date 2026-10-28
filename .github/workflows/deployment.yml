@@ -9,6 +9,14 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: gcp-deployment-production
+  cancel-in-progress: true
+
 jobs:
   deploy:
     name: Deploy to Cloud Run
@@ -19,10 +27,6 @@ jobs:
       github.event.workflow_run.head_branch == 'main'
 
     runs-on: ubuntu-latest
-
-    concurrency:
-      group: gcp-deployment-production
-      cancel-in-progress: true
 
     environment: production
 
@@ -67,7 +71,8 @@ jobs:
       - name: Build container image
         run: |
           docker build \
-            --tag "${{ steps.image.outputs.versioned }}"
+            --tag "${{ steps.image.outputs.versioned }}" \
+            .
 
       - name: Push versioned image
         run: docker push "${{ steps.image.outputs.versioned }}"
