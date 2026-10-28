@@ -7,8 +7,17 @@ services:
   build-amd:
     <<: *build-common
     platform: linux/amd64
-    image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/copernicus/web-service:${IMAGE_TAG:-latest}
+    image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
   build-arm:
     <<: *build-common
     platform: linux/arm64
     image: copernicus:arm64
+
+  local:
+    <<: *build-common
+    platform: linux/arm64
+    image: copernicus:local
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
