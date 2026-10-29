@@ -2,6 +2,10 @@ package transport
 
 import "github.com/copernicus-ml/web-service/internal/repositories"
 
+type MessageResponse struct {
+	Message string `json:"message"`
+}
+
 type StockInfoResponse struct {
 	TSCode       string `json:"ts_code"`
 	CompanyName  string `json:"company_name"`

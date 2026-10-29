@@ -61,6 +61,17 @@ func TestLRUCache(t *testing.T) {
 				{name: "read replacement", action: "get", key: "a", wantValue: 2, wantFound: true},
 			},
 		},
+		{
+			name:     "clear cache",
+			capacity: 2,
+			ops: []operation{
+				{name: "put initial values 1", action: "put", key: "a", value: 1},
+				{name: "put initial values 2", action: "put", key: "b", value: 2},
+				{name: "clear cache", action: "clear"},
+				{name: "no value 1", action: "get", key: "a", wantFound: false},
+				{name: "no value 2", action: "get", key: "b", wantFound: false},
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -76,6 +87,8 @@ func TestLRUCache(t *testing.T) {
 					if found {
 						assert.Equal(t, op.wantValue, got)
 					}
+				case "clear":
+					cache.Clear()
 				default:
 					t.Fatalf("unknown action: %q", op.action)
 				}

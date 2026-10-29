@@ -72,3 +72,11 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 		OK(c, stockFeatures)
 	})
 }
+
+func SetupInternalRoutes(router *gin.Engine, stockHandler *StockHandler) {
+	internalGroup := router.Group("/internal", InternalServiceMiddleware())
+	internalGroup.GET("/clear-lru", func(c *gin.Context) {
+		response := stockHandler.InvalidateCache()
+		OK(c, response)
+	})
+}
