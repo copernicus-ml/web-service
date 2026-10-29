@@ -146,6 +146,11 @@ func (s *StockStore) ReadFeatures(ctx context.Context, ticker string) ([]StockFe
 	return stockFeatures, nil
 }
 
+func (s *StockStore) InvalidateCache() {
+	s.stockCache.Clear()
+	s.featureCache.Clear()
+}
+
 // ================== private methods ==================
 
 // load stock list from r2 storage

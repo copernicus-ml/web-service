@@ -82,6 +82,7 @@ func main() {
 	// init handlers
 	stockHandler := transport.NewStockStoreHandler(stockStore, logger)
 	transport.SetupStoreRoutes(router, stockHandler)
+	transport.SetupInternalRoutes(router, stockHandler)
 
 	protectedRouter := clerkhttp.WithHeaderAuthorization(
 		clerkhttp.AuthorizedPartyMatches(origins...),

@@ -185,3 +185,10 @@ func (h *StockHandler) ValidateFeatureGroup(featureGroup string) error {
 	}
 	return nil
 }
+
+// invalidates stock store's lru cache. should NEVER expose this function
+// to the user-facing routes
+func (h *StockHandler) InvalidateCache() *MessageResponse {
+	h.stockStore.InvalidateCache()
+	return &MessageResponse{Message: "LRU Cache cleared."}
+}
