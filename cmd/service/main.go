@@ -36,6 +36,7 @@ func main() {
 	// init logger and context
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		ReplaceAttr: utils.LoggerGoogleFormate,
+		Level:       slog.LevelWarn,
 	}))
 	ctx := context.Background()
 	// get runtime env

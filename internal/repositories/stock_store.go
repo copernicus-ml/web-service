@@ -26,7 +26,11 @@ const (
 	metaDir                 = "meta"
 	stockDir                = "stock"
 	featureDir              = "feature"
+	marketDir               = "market"
 	stockListFileNamePrefix = "stock_list"
+
+	stockPctFilename    = "stock_pct"
+	industryPctFilename = "industry_pct"
 )
 
 const maxLRUCapacity = 100
@@ -146,6 +150,26 @@ func (s *StockStore) ReadFeatures(ctx context.Context, ticker string) ([]StockFe
 	return stockFeatures, nil
 }
 
+func (s *StockStore) ReadStockDayPctChanges(ctx context.Context) ([]StockPctChange, error) {
+	// should implement cache here
+	pctChanges, err := readParquet[StockPctChange](
+		ctx, s.r2, s.bucket, marketDir, stockPctFilename)
+	if err != nil {
+		return nil, err
+	}
+	return pctChanges, nil
+}
+
+func (s *StockStore) ReadIndustryPctChanges(ctx context.Context) ([]IndustryPctChange, error) {
+	// should also implement cache here
+	pctChanges, err := readParquet[IndustryPctChange](
+		ctx, s.r2, s.bucket, marketDir, industryPctFilename)
+	if err != nil {
+		return nil, err
+	}
+	return pctChanges, nil
+}
+
 func (s *StockStore) InvalidateCache() {
 	s.stockCache.Clear()
 	s.featureCache.Clear()
@@ -225,33 +249,9 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 
 // parse stock prices parquet file to GO struct
 func readStock(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]StockPrice, error) {
-	fileKey := fmt.Sprintf("%s/%s.parquet", stockDir, ticker)
-	object, err := r2.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(fileKey),
-	})
+	prices, err := readParquet[StockPrice](ctx, r2, bucket, stockDir, ticker)
 	if err != nil {
-		return nil, fmt.Errorf("get stock object %q: %w", fileKey, err)
-	}
-	defer object.Body.Close()
-	payload, err := io.ReadAll(object.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read stock object %q: %w", fileKey, err)
-	}
-	reader := parquet.NewGenericReader[StockPrice](bytes.NewReader(payload))
-	defer reader.Close()
-
-	var prices []StockPrice
-	buffer := make([]StockPrice, 1024)
-	for {
-		count, err := reader.Read(buffer)
-		prices = append(prices, buffer[:count]...)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("decode parquet %q: %w", fileKey, err)
-		}
+		return nil, err
 	}
 	sort.Slice(prices, func(i, j int) bool {
 		return prices[i].TradeDate < prices[j].TradeDate
@@ -260,8 +260,22 @@ func readStock(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]Sto
 }
 
 // parse stock feature parquet file to GO struct
-func readFeatures(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]StockFeature, error) {
-	fileKey := fmt.Sprintf("%s/%s.parquet", featureDir, ticker)
+func readFeatures(
+	ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]StockFeature, error) {
+	features, err := readParquet[StockFeature](ctx, r2, bucket, featureDir, ticker)
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(features, func(i, j int) bool {
+		return features[i].TradeDate < features[j].TradeDate
+	})
+	return features, nil
+}
+
+// parse parquet file to GO struct
+func readParquet[T any](
+	ctx context.Context, r2 *s3.Client, bucket, folder, file string) ([]T, error) {
+	fileKey := fmt.Sprintf("%s/%s.parquet", folder, file)
 	object, err := r2.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(fileKey),
@@ -274,23 +288,20 @@ func readFeatures(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]
 	if err != nil {
 		return nil, fmt.Errorf("read feature object %q: %w", fileKey, err)
 	}
-	reader := parquet.NewGenericReader[StockFeature](bytes.NewReader(payload))
+	reader := parquet.NewGenericReader[T](bytes.NewReader(payload))
 	defer reader.Close()
 
-	var features []StockFeature
-	buffer := make([]StockFeature, 1024)
+	var output []T
+	buffer := make([]T, 1024)
 	for {
 		count, err := reader.Read(buffer)
-		features = append(features, buffer[:count]...)
+		output = append(output, buffer[:count]...)
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("decode stock feature parquet %q: %w", fileKey, err)
+			return nil, fmt.Errorf("decode parquet data %q: %w", fileKey, err)
 		}
 	}
-	sort.Slice(features, func(i, j int) bool {
-		return features[i].TradeDate < features[j].TradeDate
-	})
-	return features, nil
+	return output, nil
 }

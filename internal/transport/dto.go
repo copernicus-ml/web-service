@@ -342,3 +342,55 @@ func toCCIResponse(raw []repositories.StockFeature) []CCIResponse {
 	}
 	return response
 }
+
+type StockPctChangeResponse struct {
+	TSCode       string  `json:"ts_code"`
+	TradeDate    string  `json:"trade_date"`
+	SubIndustry  string  `json:"sub_industry"`
+	PctChange1D  float32 `json:"pct_change_1d"`
+	PctChange5D  float32 `json:"pct_change_5d"`
+	PctChange10D float32 `json:"pct_change_10d"`
+	PctChange20D float32 `json:"pct_change_20d"`
+	PctChange60D float32 `json:"pct_change_60d"`
+}
+
+func toStockPctChangeResponse(raw []repositories.StockPctChange) []StockPctChangeResponse {
+	response := make([]StockPctChangeResponse, len(raw))
+	for i, data := range raw {
+		response[i] = StockPctChangeResponse{
+			TSCode:       data.TSCode,
+			TradeDate:    data.TradeDate,
+			SubIndustry:  data.SubIndustry,
+			PctChange1D:  data.PctChange1D,
+			PctChange5D:  data.PctChange5D,
+			PctChange10D: data.PctChange10D,
+			PctChange20D: data.PctChange20D,
+			PctChange60D: data.PctChange60D,
+		}
+	}
+	return response
+}
+
+type IndustryPctChangeResponse struct {
+	SubIndustry  string  `json:"sub_industry"`
+	PctChange1D  float32 `json:"pct_change_1d"`
+	PctChange5D  float32 `json:"pct_change_5d"`
+	PctChange10D float32 `json:"pct_change_10d"`
+	PctChange20D float32 `json:"pct_change_20d"`
+	PctChange60D float32 `json:"pct_change_60d"`
+}
+
+func toIndustryPctChangeResponse(raw []repositories.IndustryPctChange) []IndustryPctChangeResponse {
+	response := make([]IndustryPctChangeResponse, len(raw))
+	for i, data := range raw {
+		response[i] = IndustryPctChangeResponse{
+			SubIndustry:  data.SubIndustry,
+			PctChange1D:  data.PctChange1D,
+			PctChange5D:  data.PctChange5D,
+			PctChange10D: data.PctChange10D,
+			PctChange20D: data.PctChange20D,
+			PctChange60D: data.PctChange60D,
+		}
+	}
+	return response
+}

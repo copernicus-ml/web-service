@@ -120,3 +120,23 @@ type StockFeature struct {
 	Cci    float32 `parquet:"cci"`
 	CciMa5 float32 `parquet:"cci_ma_5"`
 }
+
+type StockPctChange struct {
+	TSCode       string  `parquet:"ts_code"`
+	TradeDate    string  `parquet:"trade_date"`
+	SubIndustry  string  `parquet:"sub_industry"`
+	PctChange1D  float32 `parquet:"pct_change_1d"`
+	PctChange5D  float32 `parquet:"pct_change_5d"`
+	PctChange10D float32 `parquet:"pct_change_10d"`
+	PctChange20D float32 `parquet:"pct_change_20d"`
+	PctChange60D float32 `parquet:"pct_change_60d"`
+}
+
+type IndustryPctChange struct {
+	SubIndustry  string  `parquet:"sub_industry"`
+	PctChange1D  float32 `parquet:"pct_change_1d"`
+	PctChange5D  float32 `parquet:"pct_change_5d"`
+	PctChange10D float32 `parquet:"pct_change_10d"`
+	PctChange20D float32 `parquet:"pct_change_20d"`
+	PctChange60D float32 `parquet:"pct_change_60d"`
+}
