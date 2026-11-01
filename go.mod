@@ -7,6 +7,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.33.9
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.9
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
+	github.com/clerk/clerk-sdk-go/v2 v2.7.0
+	github.com/gin-contrib/cors v1.7.9
 	github.com/gin-gonic/gin v1.12.0
 	github.com/parquet-go/parquet-go v0.32.0
 	github.com/stretchr/testify v1.12.1
@@ -31,10 +33,8 @@ require (
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.2 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
-	github.com/clerk/clerk-sdk-go/v2 v2.7.0 // indirect
 	github.com/cloudwego/base64x v0.1.7 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
-	github.com/gin-contrib/cors v1.7.9 // indirect
 	github.com/gin-contrib/sse v1.1.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -56,6 +56,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.60.0 // indirect
+	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/twpayne/go-geom v1.6.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
