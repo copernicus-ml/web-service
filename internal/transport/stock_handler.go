@@ -77,6 +77,9 @@ func (h *StockHandler) GetStockList() [][]string {
 		item := []string{ticker, info.CompanyName}
 		stockList = append(stockList, item)
 	}
+	slices.SortFunc(stockList, func(a, b []string) int {
+		return strings.Compare(a[0], b[0])
+	})
 	return stockList
 }
 
