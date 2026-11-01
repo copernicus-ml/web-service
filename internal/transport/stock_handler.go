@@ -13,6 +13,7 @@ import (
 const approxDaysPerYear int = 252
 
 const (
+	// feature params
 	PriceMomentum  = "pricemomentum"
 	VolumeMomentum = "volumemomentum"
 	Volatility     = "volatility"
@@ -24,6 +25,10 @@ const (
 	KDJ            = "kdj"
 	OBV            = "obv"
 	CCI            = "cci"
+
+	// market scope params
+	StockPct    = "stockpct"
+	IndustryPct = "industrypct"
 )
 
 var validFeatureGroups []string = []string{
@@ -40,6 +45,11 @@ var validFeatureGroups []string = []string{
 	CCI,
 }
 
+var marketScopes []string = []string{
+	StockPct,
+	IndustryPct,
+}
+
 var dataWindow map[string]int = map[string]int{
 	"60days":  60,
 	"90days":  90,
@@ -49,12 +59,12 @@ var dataWindow map[string]int = map[string]int{
 }
 
 type StockHandler struct {
-	stockStore *repositories.StockStore
+	stockStore StockStoreRepo
 	logger     *slog.Logger
 }
 
 func NewStockStoreHandler(
-	stockStore *repositories.StockStore,
+	stockStore StockStoreRepo,
 	logger *slog.Logger,
 ) *StockHandler {
 	return &StockHandler{stockStore: stockStore, logger: logger}
@@ -86,7 +96,6 @@ func (h *StockHandler) GetStockInfo(ticker string) (*StockInfoResponse, error) {
 		Headquarters: stockInfo.Headquarters,
 		Founded:      stockInfo.Founded,
 	}, nil
-
 }
 
 // get stock prices with ticker and data window
@@ -163,10 +172,47 @@ func (h *StockHandler) GetStockFeatures(
 	return response, nil
 }
 
+// get market analysis data
+func (h *StockHandler) GetMarketAnalysis(ctx context.Context, scope string) (any, error) {
+	funcLogger := h.logger.With("path", "internal/handlers/stock/GetMarketAnalysis")
+	scope = strings.ToLower(scope)
+	var response any
+	var err error
+	switch scope {
+	case StockPct:
+		response, err = h.stockStore.ReadStockDayPctChanges(ctx)
+		if err == nil {
+			response = toStockPctChangeResponse(
+				response.([]repositories.StockPctChange))
+		}
+	case IndustryPct:
+		response, err = h.stockStore.ReadIndustryPctChanges(ctx)
+		if err == nil {
+			response = toIndustryPctChangeResponse(
+				response.([]repositories.IndustryPctChange))
+		}
+	default:
+		err = fmt.Errorf("failed to get market analysis: %q", scope)
+	}
+	if err != nil {
+		funcLogger.Error("get market data", "error", err)
+		return nil, err
+	}
+	return response, nil
+}
+
 func (h *StockHandler) ValidateTicker(ticker string) error {
 	ticker = strings.ToUpper(ticker)
 	if !h.stockStore.ValidateTicker(ticker) {
 		return fmt.Errorf("invalid ticker name: %q", ticker)
+	}
+	return nil
+}
+
+func (h *StockHandler) ValidateMarket(scope string) error {
+	scope = strings.ToLower(scope)
+	if !slices.Contains(marketScopes, scope) {
+		return fmt.Errorf("invalid market scope: %q", scope)
 	}
 	return nil
 }
