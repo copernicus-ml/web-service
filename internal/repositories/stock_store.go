@@ -43,6 +43,7 @@ type StockStore struct {
 	inMemStockList map[string]StockInfo
 	stockCache     *LRUCache[string, []StockPrice]
 	featureCache   *LRUCache[string, []StockFeature]
+	filesKVCache   *SimpleKVCache
 }
 
 func NewStockStore(ctx context.Context, runtimeEnv string, logger *slog.Logger) (*StockStore, error) {
@@ -87,6 +88,7 @@ func NewStockStore(ctx context.Context, runtimeEnv string, logger *slog.Logger) 
 	logger.Info("stock list loaded", "count", len(stockList))
 	stockCache := NewLRUCache[string, []StockPrice](maxLRUCapacity)
 	featureCache := NewLRUCache[string, []StockFeature](maxLRUCapacity)
+	fileKVCache := NewSimpleKVCache()
 	return &StockStore{
 		r2:             r2,
 		runtimeEnv:     runtimeEnv,
@@ -95,6 +97,7 @@ func NewStockStore(ctx context.Context, runtimeEnv string, logger *slog.Logger) 
 		logger:         logger,
 		stockCache:     stockCache,
 		featureCache:   featureCache,
+		filesKVCache:   fileKVCache,
 	}, nil
 }
 
@@ -151,28 +154,53 @@ func (s *StockStore) ReadFeatures(ctx context.Context, ticker string) ([]StockFe
 }
 
 func (s *StockStore) ReadStockDayPctChanges(ctx context.Context) ([]StockPctChange, error) {
-	// should implement cache here
+	funcLogger := s.logger.With("path", "internal/repositories/stock_store.go/ReadStockDayPctChanges")
+	cacheData, ok := s.filesKVCache.Get(stockPctFilename)
+	if ok {
+		pctChanges := cacheData.([]StockPctChange)
+		if pctChanges != nil {
+			return pctChanges, nil
+		} else {
+			funcLogger.Warn("Error asserting type for cached data", "key", stockPctFilename)
+			s.filesKVCache.Delete(stockPctFilename)
+		}
+	}
 	pctChanges, err := readParquet[StockPctChange](
 		ctx, s.r2, s.bucket, marketDir, stockPctFilename)
 	if err != nil {
 		return nil, err
 	}
+	s.filesKVCache.Put(stockPctFilename, pctChanges)
 	return pctChanges, nil
 }
 
 func (s *StockStore) ReadIndustryPctChanges(ctx context.Context) ([]IndustryPctChange, error) {
-	// should also implement cache here
+	funcLogger := s.logger.With(
+		"path", "internal/repositories/stock_store.go/ReadIndustryPctChanges")
+	cachedData, ok := s.filesKVCache.Get(industryPctFilename)
+	if ok {
+		pctChanges := cachedData.([]IndustryPctChange)
+		if pctChanges != nil {
+			return pctChanges, nil
+		} else {
+			funcLogger.Warn(
+				"Error asserting type of cached data", "key", industryPctFilename)
+			s.filesKVCache.Delete(industryPctFilename)
+		}
+	}
 	pctChanges, err := readParquet[IndustryPctChange](
 		ctx, s.r2, s.bucket, marketDir, industryPctFilename)
 	if err != nil {
 		return nil, err
 	}
+	s.filesKVCache.Put(industryPctFilename, pctChanges)
 	return pctChanges, nil
 }
 
 func (s *StockStore) InvalidateCache() {
 	s.stockCache.Clear()
 	s.featureCache.Clear()
+	s.filesKVCache.Clear()
 }
 
 // ================== private methods ==================
