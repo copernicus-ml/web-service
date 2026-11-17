@@ -117,7 +117,7 @@ var mockIndustryPctChanges = []repositories.IndustryPctChange{
 
 var mockStockInfos = map[string]repositories.StockInfo{
 	"MSFT": {
-		TSCode:       "MSFT",
+		Symbol:       "MSFT",
 		CompanyName:  "Microsoft Corporation",
 		Sector:       "Information Technology",
 		SubIndustry:  "Systems Software",
@@ -127,7 +127,7 @@ var mockStockInfos = map[string]repositories.StockInfo{
 		Founded:      "1975",
 	},
 	"AAPL": {
-		TSCode:       "AAPL",
+		Symbol:       "AAPL",
 		CompanyName:  "Apple Inc.",
 		Sector:       "Information Technology",
 		SubIndustry:  "Technology Hardware, Storage & Peripherals",
@@ -137,7 +137,7 @@ var mockStockInfos = map[string]repositories.StockInfo{
 		Founded:      "1976",
 	},
 	"JPM": {
-		TSCode:       "JPM",
+		Symbol:       "JPM",
 		CompanyName:  "JPMorgan Chase & Co.",
 		Sector:       "Financials",
 		SubIndustry:  "Diversified Banks",
@@ -147,7 +147,7 @@ var mockStockInfos = map[string]repositories.StockInfo{
 		Founded:      "1799",
 	},
 	"JNJ": {
-		TSCode:       "JNJ",
+		Symbol:       "JNJ",
 		CompanyName:  "Johnson & Johnson",
 		Sector:       "Health Care",
 		SubIndustry:  "Pharmaceuticals",
@@ -157,7 +157,7 @@ var mockStockInfos = map[string]repositories.StockInfo{
 		Founded:      "1886",
 	},
 	"XOM": {
-		TSCode:       "XOM",
+		Symbol:       "XOM",
 		CompanyName:  "Exxon Mobil Corporation",
 		Sector:       "Energy",
 		SubIndustry:  "Integrated Oil & Gas",
@@ -167,7 +167,7 @@ var mockStockInfos = map[string]repositories.StockInfo{
 		Founded:      "1999",
 	},
 	"AMZN": {
-		TSCode:       "AMZN",
+		Symbol:       "AMZN",
 		CompanyName:  "Amazon.com, Inc.",
 		Sector:       "Consumer Discretionary",
 		SubIndustry:  "Broadline Retail",

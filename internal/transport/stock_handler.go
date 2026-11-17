@@ -92,7 +92,7 @@ func (h *StockHandler) GetStockInfo(ticker string) (*StockInfoResponse, error) {
 		return nil, err
 	}
 	return &StockInfoResponse{
-		TSCode:       stockInfo.TSCode,
+		TSCode:       stockInfo.Symbol,
 		CompanyName:  stockInfo.CompanyName,
 		Sector:       stockInfo.Sector,
 		SubIndustry:  stockInfo.SubIndustry,

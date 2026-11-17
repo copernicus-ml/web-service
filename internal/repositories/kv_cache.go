@@ -37,5 +37,5 @@ func (c *SimpleKVCache) Delete(key string) {
 func (c *SimpleKVCache) Clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.cache = map[string]any{}
+	clear(c.cache)
 }
