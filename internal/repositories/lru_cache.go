@@ -18,7 +18,7 @@ type LRUCache[K comparable, V any] struct {
 	items     map[K]*list.Element
 }
 
-// initialize new LRUCache with a fixed capacity
+// NewLRUCache initialize new LRUCache with a fixed capacity
 func NewLRUCache[K comparable, V any](capacity int) *LRUCache[K, V] {
 	return &LRUCache[K, V]{
 		capacity:  capacity,
@@ -61,7 +61,7 @@ func (c *LRUCache[K, V]) Clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.evictList.Init()
-	c.items = make(map[K]*list.Element)
+	clear(c.items)
 }
 
 func (c *LRUCache[K, V]) evictOldest() {

@@ -231,7 +231,7 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 		return nil, fmt.Errorf("read stock-list header: %w", err)
 	}
 	expected := []string{
-		"ts_code", "company_name", "sector", "sub_industry",
+		"symbol", "company_name", "sector", "sub_industry",
 		"headquarters", "date_added", "cik", "founded"}
 	for i, name := range expected {
 		if header[i] != name {
@@ -251,7 +251,7 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 			return nil, fmt.Errorf("read stock-list row %d: %w", line, err)
 		}
 		stockInfo := StockInfo{
-			TSCode:       record[0],
+			Symbol:       record[0],
 			CompanyName:  record[1],
 			Sector:       record[2],
 			SubIndustry:  record[3],
@@ -260,14 +260,14 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 			CIK:          record[6],
 			Founded:      record[7],
 		}
-		if stockInfo.TSCode == "" {
+		if stockInfo.Symbol == "" {
 			return nil, fmt.Errorf("stock-list row %d has empty ts_code", line)
 		}
-		if _, exists := stockList[stockInfo.TSCode]; exists {
-			funcLogger.Warn("duplicate ts_code", "ts_code", stockInfo.TSCode)
+		if _, exists := stockList[stockInfo.Symbol]; exists {
+			funcLogger.Warn("duplicate ts_code", "ts_code", stockInfo.Symbol)
 			continue
 		}
-		stockList[stockInfo.TSCode] = stockInfo
+		stockList[stockInfo.Symbol] = stockInfo
 	}
 	if len(stockList) == 0 {
 		return nil, fmt.Errorf("Failed to load stock list, current list is empty")

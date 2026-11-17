@@ -30,13 +30,13 @@ func toStockPricesResponse(raw []repositories.StockPrice) []StockPriceResponse {
 	response := make([]StockPriceResponse, len(raw))
 	for i, price := range raw {
 		response[i] = StockPriceResponse{
-			TsCode:    price.TsCode,
+			TsCode:    price.Symbol,
 			TradeDate: price.TradeDate,
-			AdjOpen:   price.AdjOpen,
-			AdjClose:  price.AdjClose,
-			AdjHigh:   price.AdjHigh,
-			AdjLow:    price.AdjLow,
-			AdjVol:    price.AdjVol,
+			AdjOpen:   price.Open,
+			AdjClose:  price.Close,
+			AdjHigh:   price.High,
+			AdjLow:    price.Low,
+			AdjVol:    price.Volume,
 			Turnover:  price.Turnover,
 		}
 	}

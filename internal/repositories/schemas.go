@@ -1,7 +1,7 @@
 package repositories
 
 type StockInfo struct {
-	TSCode       string
+	Symbol       string
 	CompanyName  string
 	Sector       string
 	SubIndustry  string
@@ -12,19 +12,19 @@ type StockInfo struct {
 }
 
 type StockPrice struct {
-	TsCode    string  `parquet:"ts_code"`
-	TradeDate string  `parquet:"trade_date"`
-	AdjOpen   float32 `parquet:"adj_open"`
-	AdjClose  float32 `parquet:"adj_close"`
-	AdjHigh   float32 `parquet:"adj_high"`
-	AdjLow    float32 `parquet:"adj_low"`
-	AdjVol    float32 `parquet:"adj_vol"`
+	Symbol    string  `parquet:"symbol"`
+	TradeDate string  `parquet:"date"`
+	Open      float32 `parquet:"open"`
+	Close     float32 `parquet:"close"`
+	High      float32 `parquet:"high"`
+	Low       float32 `parquet:"low"`
+	Volume    float32 `parquet:"volume"`
 	Turnover  float32 `parquet:"turnover"`
 }
 
 type StockFeature struct {
-	TsCode    string `parquet:"ts_code"`
-	TradeDate string `parquet:"trade_date"`
+	Symbol    string `parquet:"symbol"`
+	TradeDate string `parquet:"date"`
 	// Price momentum features
 	Ma5        float32 `parquet:"ma_5"`
 	Ma20       float32 `parquet:"ma_20"`
@@ -122,8 +122,8 @@ type StockFeature struct {
 }
 
 type StockPctChange struct {
-	TSCode       string  `parquet:"ts_code"`
-	TradeDate    string  `parquet:"trade_date"`
+	TSCode       string  `parquet:"symbol"`
+	TradeDate    string  `parquet:"date"`
 	SubIndustry  string  `parquet:"sub_industry"`
 	PctChange1D  float32 `parquet:"pct_change_1d"`
 	PctChange5D  float32 `parquet:"pct_change_5d"`
