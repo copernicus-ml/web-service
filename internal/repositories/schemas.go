@@ -12,19 +12,19 @@ type StockInfo struct {
 }
 
 type StockPrice struct {
-	Symbol    string  `parquet:"symbol"`
-	TradeDate string  `parquet:"date"`
-	Open      float32 `parquet:"open"`
-	Close     float32 `parquet:"close"`
-	High      float32 `parquet:"high"`
-	Low       float32 `parquet:"low"`
-	Volume    float32 `parquet:"volume"`
-	Turnover  float32 `parquet:"turnover"`
+	Symbol   string  `parquet:"symbol"`
+	Date     string  `parquet:"date"`
+	Open     float32 `parquet:"open"`
+	Close    float32 `parquet:"close"`
+	High     float32 `parquet:"high"`
+	Low      float32 `parquet:"low"`
+	Volume   float32 `parquet:"volume"`
+	Turnover float32 `parquet:"turnover"`
 }
 
 type StockFeature struct {
-	Symbol    string `parquet:"symbol"`
-	TradeDate string `parquet:"date"`
+	Symbol string `parquet:"symbol"`
+	Date   string `parquet:"date"`
 	// Price momentum features
 	Ma5        float32 `parquet:"ma_5"`
 	Ma20       float32 `parquet:"ma_20"`
@@ -122,8 +122,8 @@ type StockFeature struct {
 }
 
 type StockPctChange struct {
-	TSCode       string  `parquet:"symbol"`
-	TradeDate    string  `parquet:"date"`
+	Symbol       string  `parquet:"symbol"`
+	Date         string  `parquet:"date"`
 	SubIndustry  string  `parquet:"sub_industry"`
 	PctChange1D  float32 `parquet:"pct_change_1d"`
 	PctChange5D  float32 `parquet:"pct_change_5d"`

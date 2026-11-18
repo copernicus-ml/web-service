@@ -92,7 +92,7 @@ func (h *StockHandler) GetStockInfo(ticker string) (*StockInfoResponse, error) {
 		return nil, err
 	}
 	return &StockInfoResponse{
-		TSCode:       stockInfo.Symbol,
+		Symbol:       stockInfo.Symbol,
 		CompanyName:  stockInfo.CompanyName,
 		Sector:       stockInfo.Sector,
 		SubIndustry:  stockInfo.SubIndustry,
@@ -204,10 +204,10 @@ func (h *StockHandler) GetMarketAnalysis(ctx context.Context, scope string) (any
 	return response, nil
 }
 
-func (h *StockHandler) ValidateTicker(ticker string) error {
-	ticker = strings.ToUpper(ticker)
-	if !h.stockStore.ValidateTicker(ticker) {
-		return fmt.Errorf("invalid ticker name: %q", ticker)
+func (h *StockHandler) ValidateSymbol(symbol string) error {
+	symbol = strings.ToUpper(symbol)
+	if !h.stockStore.ValidateSymbol(symbol) {
+		return fmt.Errorf("invalid symbol name: %q", symbol)
 	}
 	return nil
 }

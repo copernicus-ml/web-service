@@ -44,12 +44,12 @@ func TestValidateTicker(t *testing.T) {
 		t.Run(tt.name, func(*testing.T) {
 			input := strings.ToUpper(tt.inputTicker)
 			if !tt.expectError {
-				mockStore.On("ValidateTicker", input).Return(true).Once()
-				err := storeHandler.ValidateTicker(input)
+				mockStore.On("ValidateSymbol", input).Return(true).Once()
+				err := storeHandler.ValidateSymbol(input)
 				assert.Nil(t, err)
 			} else {
-				mockStore.On("ValidateTicker", input).Return(false).Once()
-				err := storeHandler.ValidateTicker(strings.ToUpper(input))
+				mockStore.On("ValidateSymbol", input).Return(false).Once()
+				err := storeHandler.ValidateSymbol(strings.ToUpper(input))
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), strings.ToUpper(input))
 			}
@@ -250,8 +250,8 @@ func TestGetMarketAnalysis(t *testing.T) {
 				firstData := output[0]
 				firstReference := mockStockPctChanges[0]
 				assert.Equal(t, len(output), len(mockStockPctChanges))
-				assert.Equal(t, firstReference.TSCode, firstData.TSCode)
-				assert.Equal(t, firstReference.TradeDate, firstData.TradeDate)
+				assert.Equal(t, firstReference.Symbol, firstData.Symbol)
+				assert.Equal(t, firstReference.Date, firstData.Date)
 				assert.Equal(t, firstReference.PctChange1D, firstData.PctChange1D)
 				assert.Equal(t, firstReference.PctChange20D, firstData.PctChange20D)
 			} else if tt.scope == IndustryPct {
