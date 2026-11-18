@@ -101,8 +101,8 @@ func NewStockStore(ctx context.Context, runtimeEnv string, logger *slog.Logger) 
 	}, nil
 }
 
-func (s *StockStore) ValidateTicker(ticker string) bool {
-	if _, ok := s.inMemStockList[ticker]; !ok {
+func (s *StockStore) ValidateSymbol(symbol string) bool {
+	if _, ok := s.inMemStockList[symbol]; !ok {
 		return false
 	}
 	return true
@@ -282,7 +282,7 @@ func readStock(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]Sto
 		return nil, err
 	}
 	sort.Slice(prices, func(i, j int) bool {
-		return prices[i].TradeDate < prices[j].TradeDate
+		return prices[i].Date < prices[j].Date
 	})
 	return prices, nil
 }
@@ -295,7 +295,7 @@ func readFeatures(
 		return nil, err
 	}
 	sort.Slice(features, func(i, j int) bool {
-		return features[i].TradeDate < features[j].TradeDate
+		return features[i].Date < features[j].Date
 	})
 	return features, nil
 }

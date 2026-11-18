@@ -7,7 +7,7 @@ type MessageResponse struct {
 }
 
 type StockInfoResponse struct {
-	TSCode       string `json:"ts_code"`
+	Symbol       string `json:"symbol"`
 	CompanyName  string `json:"company_name"`
 	Sector       string `json:"sector"`
 	SubIndustry  string `json:"sub_industry"`
@@ -16,35 +16,35 @@ type StockInfoResponse struct {
 }
 
 type StockPriceResponse struct {
-	TsCode    string  `json:"ts_code"`
-	TradeDate string  `json:"trade_date"`
-	AdjOpen   float32 `json:"adj_open"`
-	AdjClose  float32 `json:"adj_close"`
-	AdjHigh   float32 `json:"adj_high"`
-	AdjLow    float32 `json:"adj_low"`
-	AdjVol    float32 `json:"adj_vol"`
-	Turnover  float32 `json:"turnover"`
+	Symbol   string  `json:"symbol"`
+	Date     string  `json:"date"`
+	Open     float32 `json:"open"`
+	Close    float32 `json:"close"`
+	High     float32 `json:"high"`
+	Low      float32 `json:"low"`
+	Volume   float32 `json:"volume"`
+	Turnover float32 `json:"turnover"`
 }
 
 func toStockPricesResponse(raw []repositories.StockPrice) []StockPriceResponse {
 	response := make([]StockPriceResponse, len(raw))
 	for i, price := range raw {
 		response[i] = StockPriceResponse{
-			TsCode:    price.Symbol,
-			TradeDate: price.TradeDate,
-			AdjOpen:   price.Open,
-			AdjClose:  price.Close,
-			AdjHigh:   price.High,
-			AdjLow:    price.Low,
-			AdjVol:    price.Volume,
-			Turnover:  price.Turnover,
+			Symbol:   price.Symbol,
+			Date:     price.Date,
+			Open:     price.Open,
+			Close:    price.Close,
+			High:     price.High,
+			Low:      price.Low,
+			Volume:   price.Volume,
+			Turnover: price.Turnover,
 		}
 	}
 	return response
 }
 
 type PriceMomentumResponse struct {
-	TradeDate  string  `json:"trade_date"`
+	Date       string  `json:"date"`
 	Ma5        float32 `json:"ma_5"`
 	Ma20       float32 `json:"ma_20"`
 	Ma60       float32 `json:"ma_60"`
@@ -62,7 +62,7 @@ func toPriceMomentumResponse(raw []repositories.StockFeature) []PriceMomentumRes
 	response := make([]PriceMomentumResponse, len(raw))
 	for i, features := range raw {
 		response[i] = PriceMomentumResponse{
-			TradeDate:  features.TradeDate,
+			Date:       features.Date,
 			Ma5:        features.Ma5,
 			Ma20:       features.Ma20,
 			Ma60:       features.Ma60,
@@ -80,7 +80,7 @@ func toPriceMomentumResponse(raw []repositories.StockFeature) []PriceMomentumRes
 }
 
 type VolumeMomentumResponse struct {
-	TradeDate      string  `json:"trade_date"`
+	Date           string  `json:"date"`
 	VolMa5Bias     float32 `json:"vol_ma_5_bias"`
 	VolMa10Bias    float32 `json:"vol_ma_10_bias"`
 	VolMa20Bias    float32 `json:"vol_ma_20_bias"`
@@ -98,7 +98,7 @@ func toVolumeMomentumResponse(raw []repositories.StockFeature) []VolumeMomentumR
 	response := make([]VolumeMomentumResponse, len(raw))
 	for i, features := range raw {
 		response[i] = VolumeMomentumResponse{
-			TradeDate:      features.TradeDate,
+			Date:           features.Date,
 			VolMa5Bias:     features.VolMa5Bias,
 			VolMa10Bias:    features.VolMa10Bias,
 			VolMa20Bias:    features.VolMa20Bias,
@@ -116,7 +116,7 @@ func toVolumeMomentumResponse(raw []repositories.StockFeature) []VolumeMomentumR
 }
 
 type VolatilityResponse struct {
-	TradeDate      string  `json:"trade_date"`
+	Date           string  `json:"date"`
 	VolatilityLog  float32 `json:"volatility_log"`
 	VolatilityRank float32 `json:"volatility_rank"`
 }
@@ -125,7 +125,7 @@ func toVolatilityResponse(raw []repositories.StockFeature) []VolatilityResponse 
 	response := make([]VolatilityResponse, len(raw))
 	for i, features := range raw {
 		response[i] = VolatilityResponse{
-			TradeDate:      features.TradeDate,
+			Date:           features.Date,
 			VolatilityLog:  features.VolatilityLog,
 			VolatilityRank: features.VolatilityRank,
 		}
@@ -134,7 +134,7 @@ func toVolatilityResponse(raw []repositories.StockFeature) []VolatilityResponse 
 }
 
 type OBVFeatureResponse struct {
-	TradeDate           string  `json:"trade_date"`
+	Date                string  `json:"date"`
 	ObvStrength5        float32 `json:"obv_strength_5"`
 	ObvStrength20       float32 `json:"obv_strength_20"`
 	ObvStrengthAccel520 float32 `json:"obv_strength_accel_5_20"`
@@ -144,7 +144,7 @@ func toOBVFeatureResponse(raw []repositories.StockFeature) []OBVFeatureResponse 
 	response := make([]OBVFeatureResponse, len(raw))
 	for i, features := range raw {
 		response[i] = OBVFeatureResponse{
-			TradeDate:           features.TradeDate,
+			Date:                features.Date,
 			ObvStrength5:        features.ObvStrength5,
 			ObvStrength20:       features.ObvStrength20,
 			ObvStrengthAccel520: features.ObvStrengthAccel520,
@@ -154,7 +154,7 @@ func toOBVFeatureResponse(raw []repositories.StockFeature) []OBVFeatureResponse 
 }
 
 type MarketActivityResponse struct {
-	TradeDate                  string  `json:"trade_date"`
+	Date                       string  `json:"date"`
 	Amplitude                  float32 `json:"amplitude"`
 	AmplitudeMa5               float32 `json:"amplitude_ma_5"`
 	AmplitudeMa20              float32 `json:"amplitude_ma_20"`
@@ -169,7 +169,7 @@ func toMarketActivityResponse(raw []repositories.StockFeature) []MarketActivityR
 	response := make([]MarketActivityResponse, len(raw))
 	for i, features := range raw {
 		response[i] = MarketActivityResponse{
-			TradeDate:                  features.TradeDate,
+			Date:                       features.Date,
 			Amplitude:                  features.Amplitude,
 			AmplitudeMa5:               features.AmplitudeMa5,
 			AmplitudeMa20:              features.AmplitudeMa20,
@@ -184,7 +184,7 @@ func toMarketActivityResponse(raw []repositories.StockFeature) []MarketActivityR
 }
 
 type MACDResponse struct {
-	TradeDate   string  `json:"trade_date"`
+	Date        string  `json:"date"`
 	MacdEmaSlow float32 `json:"macd_ema_slow"`
 	MacdEmaFast float32 `json:"macd_ema_fast"`
 	MacdDiff    float32 `json:"macd_diff"`
@@ -198,7 +198,7 @@ func toMACDResponse(raw []repositories.StockFeature) []MACDResponse {
 	response := make([]MACDResponse, len(raw))
 	for i, features := range raw {
 		response[i] = MACDResponse{
-			TradeDate:   features.TradeDate,
+			Date:        features.Date,
 			MacdEmaSlow: features.MacdEmaSlow,
 			MacdEmaFast: features.MacdEmaFast,
 			MacdDiff:    features.MacdDiff,
@@ -212,7 +212,7 @@ func toMACDResponse(raw []repositories.StockFeature) []MACDResponse {
 }
 
 type BollingerBandsResponse struct {
-	TradeDate  string  `json:"trade_date"`
+	Date       string  `json:"date"`
 	BbUpper    float32 `json:"bb_upper"`
 	BbLower    float32 `json:"bb_lower"`
 	BbMid      float32 `json:"bb_mid"`
@@ -224,7 +224,7 @@ func toBollingerBandsResponse(raw []repositories.StockFeature) []BollingerBandsR
 	response := make([]BollingerBandsResponse, len(raw))
 	for i, features := range raw {
 		response[i] = BollingerBandsResponse{
-			TradeDate:  features.TradeDate,
+			Date:       features.Date,
 			BbUpper:    features.BbUpper,
 			BbLower:    features.BbLower,
 			BbMid:      features.BbMid,
@@ -236,7 +236,7 @@ func toBollingerBandsResponse(raw []repositories.StockFeature) []BollingerBandsR
 }
 
 type DEMAResponse struct {
-	TradeDate      string  `json:"trade_date"`
+	Date           string  `json:"date"`
 	Dema510Fast    float32 `json:"dema_5_10_fast"`
 	Dema1020Fast   float32 `json:"dema_10_20_fast"`
 	Dema2060Fast   float32 `json:"dema_20_60_fast"`
@@ -258,7 +258,7 @@ func toDEMAResponse(raw []repositories.StockFeature) []DEMAResponse {
 	response := make([]DEMAResponse, len(raw))
 	for i, features := range raw {
 		response[i] = DEMAResponse{
-			TradeDate:      features.TradeDate,
+			Date:           features.Date,
 			Dema510Fast:    features.Dema510Fast,
 			Dema1020Fast:   features.Dema1020Fast,
 			Dema2060Fast:   features.Dema2060Fast,
@@ -280,72 +280,72 @@ func toDEMAResponse(raw []repositories.StockFeature) []DEMAResponse {
 }
 
 type RSIResponse struct {
-	TradeDate string  `json:"trade_date"`
-	Rsi6      float32 `json:"rsi_6"`
-	Rsi14     float32 `json:"rsi_14"`
+	Date  string  `json:"date"`
+	Rsi6  float32 `json:"rsi_6"`
+	Rsi14 float32 `json:"rsi_14"`
 }
 
 func toRSIResponse(raw []repositories.StockFeature) []RSIResponse {
 	response := make([]RSIResponse, len(raw))
 	for i, features := range raw {
 		response[i] = RSIResponse{
-			TradeDate: features.TradeDate,
-			Rsi6:      features.Rsi6,
-			Rsi14:     features.Rsi14,
+			Date:  features.Date,
+			Rsi6:  features.Rsi6,
+			Rsi14: features.Rsi14,
 		}
 	}
 	return response
 }
 
 type KDJResponse struct {
-	TradeDate string  `json:"trade_date"`
-	KdjLow9   float32 `json:"kdj_low_9"`
-	KdjHigh9  float32 `json:"kdj_high_9"`
-	KdjK      float32 `json:"kdj_k"`
-	KdjD      float32 `json:"kdj_d"`
-	KdjJ      float32 `json:"kdj_j"`
+	Date     string  `json:"date"`
+	KdjLow9  float32 `json:"kdj_low_9"`
+	KdjHigh9 float32 `json:"kdj_high_9"`
+	KdjK     float32 `json:"kdj_k"`
+	KdjD     float32 `json:"kdj_d"`
+	KdjJ     float32 `json:"kdj_j"`
 }
 
 func toKDJResponse(raw []repositories.StockFeature) []KDJResponse {
 	response := make([]KDJResponse, len(raw))
 	for i, features := range raw {
 		response[i] = KDJResponse{
-			TradeDate: features.TradeDate,
-			KdjLow9:   features.KdjLow9,
-			KdjHigh9:  features.KdjHigh9,
-			KdjK:      features.KdjK,
-			KdjD:      features.KdjD,
-			KdjJ:      features.KdjJ,
+			Date:     features.Date,
+			KdjLow9:  features.KdjLow9,
+			KdjHigh9: features.KdjHigh9,
+			KdjK:     features.KdjK,
+			KdjD:     features.KdjD,
+			KdjJ:     features.KdjJ,
 		}
 	}
 	return response
 }
 
 type CCIResponse struct {
-	TradeDate string  `json:"trade_date"`
-	Tp        float32 `json:"tp"`
-	TpSma     float32 `json:"tp_sma"`
-	Cci       float32 `json:"cci"`
-	CciMa5    float32 `json:"cci_ma_5"`
+	Date   string  `json:"date"`
+	Tp     float32 `json:"tp"`
+	TpSma  float32 `json:"tp_sma"`
+	Cci    float32 `json:"cci"`
+	CciMa5 float32 `json:"cci_ma_5"`
 }
 
 func toCCIResponse(raw []repositories.StockFeature) []CCIResponse {
 	response := make([]CCIResponse, len(raw))
 	for i, features := range raw {
 		response[i] = CCIResponse{
-			TradeDate: features.TradeDate,
-			Tp:        features.Tp,
-			TpSma:     features.TpSma,
-			Cci:       features.Cci,
-			CciMa5:    features.CciMa5,
+			Date:   features.Date,
+			Tp:     features.Tp,
+			TpSma:  features.TpSma,
+			Cci:    features.Cci,
+			CciMa5: features.CciMa5,
 		}
 	}
 	return response
 }
 
 type StockPctChangeResponse struct {
-	TSCode       string  `json:"ts_code"`
-	TradeDate    string  `json:"trade_date"`
+	Symbol       string  `json:"symbol"`
+	Date         string  `json:"date"`
 	SubIndustry  string  `json:"sub_industry"`
 	PctChange1D  float32 `json:"pct_change_1d"`
 	PctChange5D  float32 `json:"pct_change_5d"`
@@ -358,8 +358,8 @@ func toStockPctChangeResponse(raw []repositories.StockPctChange) []StockPctChang
 	response := make([]StockPctChangeResponse, len(raw))
 	for i, data := range raw {
 		response[i] = StockPctChangeResponse{
-			TSCode:       data.TSCode,
-			TradeDate:    data.TradeDate,
+			Symbol:       data.Symbol,
+			Date:         data.Date,
 			SubIndustry:  data.SubIndustry,
 			PctChange1D:  data.PctChange1D,
 			PctChange5D:  data.PctChange5D,

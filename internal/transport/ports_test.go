@@ -68,15 +68,15 @@ func (m *mockStockStoreRepo) ReadStockDayPctChanges(
 	return args.Get(0).([]repositories.StockPctChange), args.Error(1)
 }
 
-func (m *mockStockStoreRepo) ValidateTicker(ticker string) bool {
-	args := m.Called(ticker)
+func (m *mockStockStoreRepo) ValidateSymbol(symbol string) bool {
+	args := m.Called(symbol)
 	return args.Bool(0)
 }
 
 var mockStockPctChanges = []repositories.StockPctChange{
 	{
-		TSCode:       "AAPL",
-		TradeDate:    "20260102",
+		Symbol:       "AAPL",
+		Date:         "2026-01-02",
 		SubIndustry:  "Technology Hardware, Storage & Peripherals",
 		PctChange1D:  1.25,
 		PctChange5D:  3.50,
@@ -85,8 +85,8 @@ var mockStockPctChanges = []repositories.StockPctChange{
 		PctChange60D: 12.50,
 	},
 	{
-		TSCode:       "MSFT",
-		TradeDate:    "20260102",
+		Symbol:       "MSFT",
+		Date:         "2026-01-02",
 		SubIndustry:  "Systems Software",
 		PctChange1D:  -0.75,
 		PctChange5D:  1.80,

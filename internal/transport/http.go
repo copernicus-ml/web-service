@@ -18,9 +18,9 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 			OK(c, stockList)
 		})
 		// get stock infomation
-		stockGroup.GET("/info/:ticker", func(c *gin.Context) {
-			ticker := c.Param("ticker")
-			stockInfo, err := stockHandler.GetStockInfo(ticker)
+		stockGroup.GET("/info/:symbol", func(c *gin.Context) {
+			symbol := c.Param("symbol")
+			stockInfo, err := stockHandler.GetStockInfo(symbol)
 			if err != nil {
 				Fail(c, http.StatusNotFound, err.Error())
 				return
@@ -28,9 +28,9 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 			OK(c, stockInfo)
 		})
 		// get stock prices data
-		stockGroup.GET("/:ticker", func(c *gin.Context) {
-			ticker := c.Param("ticker")
-			if err := stockHandler.ValidateTicker(ticker); err != nil {
+		stockGroup.GET("/:symbol", func(c *gin.Context) {
+			symbol := c.Param("symbol")
+			if err := stockHandler.ValidateSymbol(symbol); err != nil {
 				Fail(c, http.StatusNotFound, err.Error())
 				return
 			}
@@ -39,7 +39,7 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 				Fail(c, http.StatusBadRequest, err.Error())
 				return
 			}
-			stockPrices, err := stockHandler.GetStockPrices(c.Request.Context(), ticker, window)
+			stockPrices, err := stockHandler.GetStockPrices(c.Request.Context(), symbol, window)
 			if err != nil {
 				Fail(c, http.StatusInternalServerError, err.Error())
 				return
@@ -52,9 +52,9 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 	{
 		featuresGroup := storeGroup.Group("/features")
 		// get stock features data
-		featuresGroup.GET("/:ticker", func(c *gin.Context) {
-			ticker := c.Param("ticker")
-			if err := stockHandler.ValidateTicker(ticker); err != nil {
+		featuresGroup.GET("/:symbol", func(c *gin.Context) {
+			symbol := c.Param("symbol")
+			if err := stockHandler.ValidateSymbol(symbol); err != nil {
 				Fail(c, http.StatusNotFound, err.Error())
 				return
 			}
@@ -69,7 +69,7 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 				return
 			}
 			stockFeatures, err := stockHandler.GetStockFeatures(
-				c.Request.Context(), ticker, featureGroup, window)
+				c.Request.Context(), symbol, featureGroup, window)
 			if err != nil {
 				Fail(c, http.StatusInternalServerError, err.Error())
 				return
