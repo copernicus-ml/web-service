@@ -7,13 +7,17 @@ type MessageResponse struct {
 }
 
 type StockInfoResponse struct {
-	Symbol       string `json:"symbol"`
-	CompanyName  string `json:"company_name"`
-	Sector       string `json:"sector"`
-	SubIndustry  string `json:"sub_industry"`
-	Headquarters string `json:"headquarters"`
-	Founded      string `json:"founded"`
+	Symbol       string  `json:"symbol"`
+	CompanyName  string  `json:"company_name"`
+	Sector       string  `json:"sector"`
+	SubIndustry  string  `json:"sub_industry"`
+	Headquarters string  `json:"headquarters"`
+	Founded      string  `json:"founded"`
+	Price        float32 `json:"price"`
+	PctChange    float32 `json:"pct_change"`
 }
+
+type StocksPctChangesResponse map[string]float32
 
 type StockPriceResponse struct {
 	Symbol   string  `json:"symbol"`
@@ -345,6 +349,7 @@ func toCCIResponse(raw []repositories.StockFeature) []CCIResponse {
 
 type StockPctChangeResponse struct {
 	Symbol       string  `json:"symbol"`
+	CompanyName  string  `json:"company_name"`
 	Date         string  `json:"date"`
 	SubIndustry  string  `json:"sub_industry"`
 	PctChange1D  float32 `json:"pct_change_1d"`
@@ -354,11 +359,14 @@ type StockPctChangeResponse struct {
 	PctChange60D float32 `json:"pct_change_60d"`
 }
 
-func toStockPctChangeResponse(raw []repositories.StockPctChange) []StockPctChangeResponse {
+func toStockPctChangeResponse(
+	raw []repositories.StockPctChange,
+	stockInfo map[string]repositories.StockInfo) []StockPctChangeResponse {
 	response := make([]StockPctChangeResponse, len(raw))
 	for i, data := range raw {
 		response[i] = StockPctChangeResponse{
 			Symbol:       data.Symbol,
+			CompanyName:  stockInfo[data.Symbol].CompanyName,
 			Date:         data.Date,
 			SubIndustry:  data.SubIndustry,
 			PctChange1D:  data.PctChange1D,

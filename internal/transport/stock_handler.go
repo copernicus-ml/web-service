@@ -1,3 +1,4 @@
+// Package transport
 package transport
 
 import (
@@ -83,14 +84,29 @@ func (h *StockHandler) GetStockList() [][]string {
 	return stockList
 }
 
-func (h *StockHandler) GetStockInfo(ticker string) (*StockInfoResponse, error) {
+func (h *StockHandler) GetStockInfo(ctx context.Context, ticker string) (*StockInfoResponse, error) {
 	funcLogger := h.logger.With("path", "internal/handlers/stock/GetStockInfo")
 	ticker = strings.ToUpper(ticker)
+	// get stock basic info
 	stockInfo, err := h.stockStore.GetStockInfo(ticker)
 	if err != nil {
 		funcLogger.Error("failed to get stockInfo", "error", err)
 		return nil, err
 	}
+	// get most recent close price
+	stockPrices, err := h.stockStore.ReadStock(ctx, ticker)
+	if err != nil {
+		funcLogger.Error("failed to read stock prices", "error", err)
+		return nil, err
+	}
+	currClosePrice := stockPrices[len(stockPrices)-1].Close
+	// get 1 day pct changes
+	pctChanges, err := h.stockStore.ReadStockPctChangesMap(ctx)
+	if err != nil {
+		funcLogger.Error("failed to read stock pct changes map", "error", err)
+		return nil, err
+	}
+	pctChange1D := pctChanges[ticker].PctChange1D
 	return &StockInfoResponse{
 		Symbol:       stockInfo.Symbol,
 		CompanyName:  stockInfo.CompanyName,
@@ -98,14 +114,17 @@ func (h *StockHandler) GetStockInfo(ticker string) (*StockInfoResponse, error) {
 		SubIndustry:  stockInfo.SubIndustry,
 		Headquarters: stockInfo.Headquarters,
 		Founded:      stockInfo.Founded,
+		Price:        currClosePrice,
+		PctChange:    pctChange1D,
 	}, nil
 }
 
-// get stock prices with ticker and data window
+// GetStockPrices get stock prices with ticker and data window
 func (h *StockHandler) GetStockPrices(
 	ctx context.Context,
 	ticker string,
-	window string) ([]StockPriceResponse, error) {
+	window string,
+) ([]StockPriceResponse, error) {
 	funcLogger := h.logger.With("path", "internal/handlers/stock/GetStockPrices")
 	ticker = strings.ToUpper(ticker)
 	stockPrices, err := h.stockStore.ReadStock(ctx, ticker)
@@ -123,12 +142,13 @@ func (h *StockHandler) GetStockPrices(
 	return response, nil
 }
 
-// get stock features with ticker, feature group name, and data window
+// GetStockFeatures get stock features with ticker, feature group name, and data window
 func (h *StockHandler) GetStockFeatures(
 	ctx context.Context,
 	ticker,
 	featureGroup string,
-	window string) (any, error) {
+	window string,
+) (any, error) {
 	funcLogger := h.logger.With("path", "internal/handlers/stock/GetStockFeatures")
 	ticker = strings.ToUpper(ticker)
 	featureGroup = strings.ToLower(featureGroup)
@@ -175,7 +195,29 @@ func (h *StockHandler) GetStockFeatures(
 	return response, nil
 }
 
-// get market analysis data
+// GetStocksPctChanges get stocks' day percent change
+func (h *StockHandler) GetStocksPctChanges(ctx context.Context, symbols []string) (
+	*StocksPctChangesResponse, error,
+) {
+	funcLogger := h.logger.With("path", "internal/handlers/stock/GetStocksPctChanges")
+	pctChangesMap, err := h.stockStore.ReadStockPctChangesMap(ctx)
+	if err != nil {
+		funcLogger.Error("failed to get stocks pct change map", "error", err)
+		return nil, err
+	}
+	response := make(StocksPctChangesResponse)
+	for _, symbol := range symbols {
+		pctChanges, ok := pctChangesMap[symbol]
+		if !ok {
+			funcLogger.Warn("failed to get pct changes", "symbol", symbol)
+			continue
+		}
+		response[symbol] = pctChanges.PctChange1D
+	}
+	return &response, nil
+}
+
+// GetMarketAnalysis get market analysis data
 func (h *StockHandler) GetMarketAnalysis(ctx context.Context, scope string) (any, error) {
 	funcLogger := h.logger.With("path", "internal/handlers/stock/GetMarketAnalysis")
 	scope = strings.ToLower(scope)
@@ -185,8 +227,9 @@ func (h *StockHandler) GetMarketAnalysis(ctx context.Context, scope string) (any
 	case StockPct:
 		response, err = h.stockStore.ReadStockDayPctChanges(ctx)
 		if err == nil {
+			stockList := h.stockStore.GetStockList()
 			response = toStockPctChangeResponse(
-				response.([]repositories.StockPctChange))
+				response.([]repositories.StockPctChange), stockList)
 		}
 	case IndustryPct:
 		response, err = h.stockStore.ReadIndustryPctChanges(ctx)
@@ -235,7 +278,7 @@ func (h *StockHandler) ValidateFeatureGroup(featureGroup string) error {
 	return nil
 }
 
-// invalidates stock store's lru cache. should NEVER expose this function
+// InvalidateCache invalidates store's lru cache and kv cache. should NEVER expose this function
 // to the user-facing routes
 func (h *StockHandler) InvalidateCache() *MessageResponse {
 	h.stockStore.InvalidateCache()

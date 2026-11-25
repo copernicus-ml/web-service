@@ -33,7 +33,8 @@ func (m *mockStockStoreRepo) InvalidateCache() {
 }
 
 func (m *mockStockStoreRepo) ReadFeatures(
-	ctx context.Context, ticker string) ([]repositories.StockFeature, error) {
+	ctx context.Context, ticker string,
+) ([]repositories.StockFeature, error) {
 	args := m.Called(ctx, ticker)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -42,7 +43,8 @@ func (m *mockStockStoreRepo) ReadFeatures(
 }
 
 func (m *mockStockStoreRepo) ReadIndustryPctChanges(
-	ctx context.Context) ([]repositories.IndustryPctChange, error) {
+	ctx context.Context,
+) ([]repositories.IndustryPctChange, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -51,7 +53,8 @@ func (m *mockStockStoreRepo) ReadIndustryPctChanges(
 }
 
 func (m *mockStockStoreRepo) ReadStock(
-	ctx context.Context, ticker string) ([]repositories.StockPrice, error) {
+	ctx context.Context, ticker string,
+) ([]repositories.StockPrice, error) {
 	args := m.Called(ctx, ticker)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -60,12 +63,23 @@ func (m *mockStockStoreRepo) ReadStock(
 }
 
 func (m *mockStockStoreRepo) ReadStockDayPctChanges(
-	ctx context.Context) ([]repositories.StockPctChange, error) {
+	ctx context.Context,
+) ([]repositories.StockPctChange, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]repositories.StockPctChange), args.Error(1)
+}
+
+func (m *mockStockStoreRepo) ReadStockPctChangesMap(
+	ctx context.Context,
+) (repositories.StockPctChangeMap, error) {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(repositories.StockPctChangeMap), args.Error(1)
 }
 
 func (m *mockStockStoreRepo) ValidateSymbol(symbol string) bool {

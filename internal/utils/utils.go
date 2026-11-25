@@ -1,6 +1,9 @@
 package utils
 
-import "log/slog"
+import (
+	"log/slog"
+	"strings"
+)
 
 func LoggerGoogleFormate(groups []string, a slog.Attr) slog.Attr {
 	switch a.Key {
@@ -30,4 +33,17 @@ func getGCPLevelValue(level slog.Level) slog.Value {
 		value = slog.StringValue("DEBUG")
 	}
 	return value
+}
+
+func ParseSymbols(symbolsStr string) []string {
+	parsedSymbols := []string{}
+	segments := strings.Split(symbolsStr, ",")
+	for _, seg := range segments {
+		seg = strings.TrimSpace(seg)
+		if len(seg) == 0 {
+			continue
+		}
+		parsedSymbols = append(parsedSymbols, strings.ToUpper(seg))
+	}
+	return parsedSymbols
 }

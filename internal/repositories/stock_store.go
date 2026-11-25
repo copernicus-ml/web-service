@@ -1,3 +1,4 @@
+// Package repositories bridges database and services
 package repositories
 
 import (
@@ -30,6 +31,7 @@ const (
 	stockListFileNamePrefix = "stock_list"
 
 	stockPctFilename    = "stock_pct"
+	stockPctMap         = "stock_pct_map"
 	industryPctFilename = "industry_pct"
 )
 
@@ -174,6 +176,34 @@ func (s *StockStore) ReadStockDayPctChanges(ctx context.Context) ([]StockPctChan
 	return pctChanges, nil
 }
 
+// ReadStockPctChangesMap read stocks pct map. the key is each stock's symbol, the value
+// is the corresponding StockPctChange record
+// this function aims to achieve quick search on each stock's pct change
+func (s *StockStore) ReadStockPctChangesMap(ctx context.Context) (StockPctChangeMap, error) {
+	funcLogger := s.logger.With(
+		"path",
+		"internal/repositories/stock_store.go/ReadStockDayPctChangesMap")
+	cachedData, ok := s.filesKVCache.Get(stockPctMap)
+	if ok {
+		pctMap := cachedData.(StockPctChangeMap)
+		if pctMap != nil {
+			return pctMap, nil
+		} else {
+			funcLogger.Warn("Error asserting type of cached data", "key", stockPctMap)
+		}
+	}
+	pctSlice, err := s.ReadStockDayPctChanges(ctx)
+	if err != nil {
+		return nil, err
+	}
+	pctMap := make(StockPctChangeMap, len(pctSlice))
+	for _, stockPct := range pctSlice {
+		pctMap[stockPct.Symbol] = stockPct
+	}
+	s.filesKVCache.Put(stockPctMap, pctMap)
+	return pctMap, nil
+}
+
 func (s *StockStore) ReadIndustryPctChanges(ctx context.Context) ([]IndustryPctChange, error) {
 	funcLogger := s.logger.With(
 		"path", "internal/repositories/stock_store.go/ReadIndustryPctChanges")
@@ -232,7 +262,8 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 	}
 	expected := []string{
 		"symbol", "company_name", "sector", "sub_industry",
-		"headquarters", "date_added", "cik", "founded"}
+		"headquarters", "date_added", "cik", "founded",
+	}
 	for i, name := range expected {
 		if header[i] != name {
 			return nil, fmt.Errorf(
@@ -270,7 +301,7 @@ func readStockListCSV(source io.Reader, logger *slog.Logger) (map[string]StockIn
 		stockList[stockInfo.Symbol] = stockInfo
 	}
 	if len(stockList) == 0 {
-		return nil, fmt.Errorf("Failed to load stock list, current list is empty")
+		return nil, fmt.Errorf("failed to load stock list, current list is empty")
 	}
 	return stockList, nil
 }
@@ -289,7 +320,8 @@ func readStock(ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]Sto
 
 // parse stock feature parquet file to GO struct
 func readFeatures(
-	ctx context.Context, r2 *s3.Client, bucket, ticker string) ([]StockFeature, error) {
+	ctx context.Context, r2 *s3.Client, bucket, ticker string,
+) ([]StockFeature, error) {
 	features, err := readParquet[StockFeature](ctx, r2, bucket, featureDir, ticker)
 	if err != nil {
 		return nil, err
@@ -302,7 +334,8 @@ func readFeatures(
 
 // parse parquet file to GO struct
 func readParquet[T any](
-	ctx context.Context, r2 *s3.Client, bucket, folder, file string) ([]T, error) {
+	ctx context.Context, r2 *s3.Client, bucket, folder, file string,
+) ([]T, error) {
 	fileKey := fmt.Sprintf("%s/%s.parquet", folder, file)
 	object, err := r2.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
