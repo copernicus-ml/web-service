@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/copernicus-ml/web-service/internal/repositories"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -179,6 +180,47 @@ func TestInvalidateCache(t *testing.T) {
 	mockStore.AssertExpectations(t)
 }
 
+// test get stocks' day percent changes
+func TestGetStocksPctChanges(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		pctChanges repositories.StockPctChangeMap
+		storeError error
+		want       *StocksPctChangesResponse
+	}{
+		{
+			name: "success with an unknown symbol",
+			pctChanges: repositories.StockPctChangeMap{
+				"AAPL": {PctChange1D: 1.25, PctChange5D: 3.5},
+				"MSFT": {PctChange1D: 2.5},
+			},
+			want: &StocksPctChangesResponse{"AAPL": 1.25},
+		},
+		{
+			name:       "failed to read stock percent changes",
+			storeError: errors.New("stock percent changes unavailable"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStore, storeHandler := getStockStoreHandler()
+			mockStore.On(
+				"ReadStockPctChangesMap", mock.Anything,
+			).Return(tt.pctChanges, tt.storeError).Once()
+
+			response, err := storeHandler.GetStocksPctChanges(t.Context(), []string{"AAPL", "UNKNOWN"})
+			mockStore.AssertExpectations(t)
+			if tt.storeError != nil {
+				assert.ErrorIs(t, err, tt.storeError)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tt.want, response)
+		})
+	}
+}
+
 // test get market analysis
 func TestGetMarketAnalysis(t *testing.T) {
 	t.Parallel()
@@ -222,6 +264,7 @@ func TestGetMarketAnalysis(t *testing.T) {
 					mockStore.On(
 						"ReadStockDayPctChanges", mock.Anything,
 					).Return(mockStockPctChanges, nil).Once()
+					mockStore.On("GetStockList").Return(mockStockInfos).Once()
 				}
 				if tt.scope == IndustryPct {
 					mockStore.On(

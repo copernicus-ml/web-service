@@ -3,6 +3,7 @@ package transport
 import (
 	"net/http"
 
+	"github.com/copernicus-ml/web-service/internal/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +21,7 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 		// get stock infomation
 		stockGroup.GET("/info/:symbol", func(c *gin.Context) {
 			symbol := c.Param("symbol")
-			stockInfo, err := stockHandler.GetStockInfo(symbol)
+			stockInfo, err := stockHandler.GetStockInfo(c.Request.Context(), symbol)
 			if err != nil {
 				Fail(c, http.StatusNotFound, err.Error())
 				return
@@ -45,6 +46,26 @@ func SetupStoreRoutes(router *gin.Engine, stockHandler *StockHandler) {
 				return
 			}
 			OK(c, stockPrices)
+		})
+	}
+
+	// /data/stocks endpoints
+	{
+		stocksGroup := storeGroup.Group("/stocks")
+		// get stocks pct changes
+		stocksGroup.GET("/changes", func(c *gin.Context) {
+			symbolsStr := c.Query("symbols")
+			parsedSymbols := utils.ParseSymbols(symbolsStr)
+			if len(parsedSymbols) == 0 {
+				Fail(c, http.StatusBadRequest, "invalid symbols")
+				return
+			}
+			pctChanges, err := stockHandler.GetStocksPctChanges(c.Request.Context(), parsedSymbols)
+			if err != nil {
+				Fail(c, http.StatusInternalServerError, err.Error())
+				return
+			}
+			OK(c, pctChanges)
 		})
 	}
 

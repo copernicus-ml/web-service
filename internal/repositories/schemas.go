@@ -132,6 +132,8 @@ type StockPctChange struct {
 	PctChange60D float32 `parquet:"pct_change_60d"`
 }
 
+type StockPctChangeMap map[string]StockPctChange
+
 type IndustryPctChange struct {
 	SubIndustry  string  `parquet:"sub_industry"`
 	PctChange1D  float32 `parquet:"pct_change_1d"`

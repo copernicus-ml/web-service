@@ -14,5 +14,6 @@ type StockStoreRepo interface {
 	ReadIndustryPctChanges(ctx context.Context) ([]repositories.IndustryPctChange, error)
 	ReadStock(ctx context.Context, ticker string) ([]repositories.StockPrice, error)
 	ReadStockDayPctChanges(ctx context.Context) ([]repositories.StockPctChange, error)
+	ReadStockPctChangesMap(ctx context.Context) (repositories.StockPctChangeMap, error)
 	ValidateSymbol(symbol string) bool
 }
